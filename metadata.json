@@ -1,0 +1,6 @@
+{
+  "name": "Fountain of Life Church",
+  "description": "Official online presence of Fountain of Life Church — Living Waters, Transforming Lives. Experience vibrant worship, inspiring sermons, active ministries, and Christ-centered community.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
