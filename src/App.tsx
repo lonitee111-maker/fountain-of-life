@@ -12,6 +12,9 @@ import { SermonPlayerModal } from './components/SermonPlayerModal';
 import { EventRegisterModal } from './components/EventRegisterModal';
 import { MinistryJoinModal } from './components/MinistryJoinModal';
 import { TestimonyModal } from './components/TestimonyModal';
+import { PrayerReminderModal } from './components/PrayerReminderModal';
+import { PrayerNotificationToast } from './components/PrayerNotificationToast';
+import { checkAndFirePrayerReminder } from './utils/prayerReminderUtils';
 
 // Pages
 import { HomePage } from './pages/HomePage';
@@ -33,10 +36,30 @@ export default function App() {
   // Modals state
   const [isPlanVisitOpen, setIsPlanVisitOpen] = useState(false);
   const [isLiveServiceOpen, setIsLiveServiceOpen] = useState(false);
+  const [isPrayerReminderOpen, setIsPrayerReminderOpen] = useState(false);
   const [selectedSermon, setSelectedSermon] = useState<Sermon | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<ChurchEvent | null>(null);
   const [selectedMinistry, setSelectedMinistry] = useState<Ministry | null>(null);
   const [isShareTestimonyOpen, setIsShareTestimonyOpen] = useState(false);
+
+  // Background prayer reminder scheduler interval & global modal trigger
+  useEffect(() => {
+    // Check immediately on mount
+    checkAndFirePrayerReminder();
+
+    // Check every 30 seconds
+    const interval = setInterval(() => {
+      checkAndFirePrayerReminder();
+    }, 30000);
+
+    const handleOpenReminder = () => setIsPrayerReminderOpen(true);
+    window.addEventListener('folc:open-prayer-reminder', handleOpenReminder);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('folc:open-prayer-reminder', handleOpenReminder);
+    };
+  }, []);
 
   // User submitted testimonies
   const [customTestimonies, setCustomTestimonies] = useState<Testimony[]>([]);
@@ -106,6 +129,7 @@ export default function App() {
         onNavigate={handleNavigate}
         onOpenPlanVisit={() => setIsPlanVisitOpen(true)}
         onOpenLiveService={() => setIsLiveServiceOpen(true)}
+        onOpenPrayerReminder={() => setIsPrayerReminderOpen(true)}
       />
 
       {/* Main Page Content */}
@@ -229,6 +253,16 @@ export default function App() {
         onClose={() => setIsShareTestimonyOpen(false)}
         onAddTestimony={handleAddTestimony}
       />
+
+      {/* Daily Morning Prayer Reminder Modal */}
+      <PrayerReminderModal
+        isOpen={isPrayerReminderOpen}
+        onClose={() => setIsPrayerReminderOpen(false)}
+        onNavigateToPrayer={() => handleNavigate('prayer')}
+      />
+
+      {/* In-App Prayer Notification Toast */}
+      <PrayerNotificationToast onNavigate={handleNavigate} />
     </div>
   );
 }

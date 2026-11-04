@@ -277,3 +277,56 @@ test('highlightKeywordTokens handles multi-word search and special characters sa
   assert.equal(emptyTokens.length, 1);
   assert.equal(emptyTokens[0].isMatch, false);
 });
+
+test('prayerReminderUtils formatTimeAmPm accurately converts 24-hr times to 12-hr format', async () => {
+  const { formatTimeAmPm } = await import('./prayerReminderUtils.ts');
+
+  assert.equal(formatTimeAmPm('06:00'), '6:00 AM');
+  assert.equal(formatTimeAmPm('05:30'), '5:30 AM');
+  assert.equal(formatTimeAmPm('12:00'), '12:00 PM');
+  assert.equal(formatTimeAmPm('18:45'), '6:45 PM');
+  assert.equal(formatTimeAmPm('00:15'), '12:15 AM');
+  assert.equal(formatTimeAmPm('invalid'), '6:00 AM');
+});
+
+test('prayerReminderUtils getTimeUntilNextReminder calculates future reminder countdown', async () => {
+  const { getTimeUntilNextReminder } = await import('./prayerReminderUtils.ts');
+
+  // Fix reference time: 2026-11-04 05:00:00
+  const fixedNow = new Date('2026-11-04T05:00:00');
+  
+  // Target: 06:00 same day
+  const resultToday = getTimeUntilNextReminder('06:00', fixedNow);
+  assert.equal(resultToday.hours, 1);
+  assert.equal(resultToday.minutes, 0);
+  assert.equal(resultToday.isTomorrow, false);
+  assert.ok(resultToday.formattedCountdown.includes('1h'));
+
+  // Target: 04:00 (past for today -> scheduled for tomorrow)
+  const resultTomorrow = getTimeUntilNextReminder('04:00', fixedNow);
+  assert.equal(resultTomorrow.hours, 23);
+  assert.equal(resultTomorrow.isTomorrow, true);
+  assert.ok(resultTomorrow.formattedCountdown.includes('tomorrow'));
+});
+
+test('PRAYER_REMINDER_TEMPLATES contains all 5 sacred focuses with scripture anchors', async () => {
+  const { PRAYER_REMINDER_TEMPLATES } = await import('./prayerReminderUtils.ts');
+
+  const keys = Object.keys(PRAYER_REMINDER_TEMPLATES);
+  assert.equal(keys.length, 5);
+  assert.ok(keys.includes('general'));
+  assert.ok(keys.includes('devotional'));
+  assert.ok(keys.includes('deliverance'));
+  assert.ok(keys.includes('victory'));
+  assert.ok(keys.includes('family'));
+
+  for (const key of keys) {
+    const item = (PRAYER_REMINDER_TEMPLATES as any)[key];
+    assert.ok(item.label);
+    assert.ok(item.defaultTitle);
+    assert.ok(item.defaultMessage);
+    assert.ok(item.scripture);
+    assert.ok(item.verseRef);
+  }
+});
+

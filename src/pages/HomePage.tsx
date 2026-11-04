@@ -22,7 +22,9 @@ import {
   Users,
   Compass,
   BookOpen,
-  Flame
+  Flame,
+  Bell,
+  Sun
 } from 'lucide-react';
 
 interface HomePageProps {
@@ -315,6 +317,42 @@ export const HomePage: React.FC<HomePageProps> = ({
         onNavigateToPrayer={() => onNavigate('prayer')}
         onNavigateToBible={() => onNavigate('bible')}
       />
+
+      {/* 4b. MORNING PRAYER REMINDER CALLOUT */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 sm:-mt-10">
+        <div className="bg-gradient-to-r from-blue-950 via-slate-900 to-indigo-950 rounded-3xl p-6 sm:p-8 text-white border-2 border-amber-400/30 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
+          <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-amber-400/5 blur-3xl pointer-events-none" />
+          <div className="flex items-center gap-4 relative z-10">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 font-bold flex items-center justify-center shrink-0 shadow-lg">
+              <Sun className="w-7 h-7 text-blue-950" />
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="text-amber-400 text-xs font-bold uppercase tracking-wider">
+                  Covenant Morning Watch
+                </span>
+                <span className="bg-amber-400/20 text-amber-300 text-[10px] px-2 py-0.5 rounded-full font-semibold border border-amber-400/30">
+                  Daily 6:00 AM
+                </span>
+              </div>
+              <h3 className="text-xl sm:text-2xl font-serif font-bold text-white">
+                Start Every Day in God’s Presence
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-300 max-w-xl">
+                Never miss your morning watch. Opt-in for daily browser notifications with our peaceful sanctuary bell chime and scripture reflection.
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={() => window.dispatchEvent(new CustomEvent('folc:open-prayer-reminder'))}
+            className="px-6 py-3 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-bold text-xs sm:text-sm rounded-xl shadow-lg transition-all hover:scale-105 shrink-0 flex items-center gap-2 relative z-10"
+          >
+            <Bell className="w-4 h-4 fill-slate-950" />
+            <span>Opt-In for Daily Reminders</span>
+          </button>
+        </div>
+      </section>
 
       {/* 5. WORSHIP PLAYLIST SECTION */}
       <WorshipPlaylistSection onNavigateToMinistries={() => onNavigate('ministries')} />

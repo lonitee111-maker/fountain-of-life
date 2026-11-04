@@ -14,25 +14,47 @@ import {
   BookOpen,
   Users,
   Compass,
-  Phone
+  Phone,
+  Bell,
+  BellRing
 } from 'lucide-react';
+import { getPrayerReminderSettings } from '../utils/prayerReminderUtils';
 
 interface NavbarProps {
   currentPage: PageId;
   onNavigate: (page: PageId) => void;
   onOpenPlanVisit: () => void;
   onOpenLiveService: () => void;
+  onOpenPrayerReminder?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   currentPage,
   onNavigate,
   onOpenPlanVisit,
-  onOpenLiveService
+  onOpenLiveService,
+  onOpenPrayerReminder
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [aboutDropdownOpen, setAboutDropdownOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [reminderActive, setReminderActive] = useState(false);
+
+  useEffect(() => {
+    // Check initial reminder state
+    const currentSettings = getPrayerReminderSettings();
+    setReminderActive(currentSettings.enabled);
+
+    const handleReminderUpdate = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (customEvent.detail) {
+        setReminderActive(Boolean(customEvent.detail.enabled));
+      }
+    };
+
+    window.addEventListener('folc:prayer-reminder-updated', handleReminderUpdate);
+    return () => window.removeEventListener('folc:prayer-reminder-updated', handleReminderUpdate);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -81,6 +103,20 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
 
             <span className="text-slate-600">|</span>
+
+            {onOpenPrayerReminder && (
+              <>
+                <button
+                  onClick={onOpenPrayerReminder}
+                  className="flex items-center gap-1.5 font-medium text-amber-300 hover:text-amber-200 transition-colors"
+                  title="Set Daily Morning Prayer Reminder"
+                >
+                  <Bell className={`w-3.5 h-3.5 ${reminderActive ? 'text-amber-400 fill-amber-400' : 'text-amber-400'}`} />
+                  <span>Morning Prayer Alarm {reminderActive && <span className="bg-amber-400 text-slate-950 font-extrabold px-1.5 py-0.2 rounded text-[10px]">ON</span>}</span>
+                </button>
+                <span className="text-slate-600">|</span>
+              </>
+            )}
 
             <a
               href={`tel:${CHURCH_INFO.phone}`}
@@ -255,7 +291,25 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
 
             {/* Right Action Buttons */}
-            <div className="hidden lg:flex items-center gap-3 shrink-0">
+            <div className="hidden lg:flex items-center gap-2.5 shrink-0">
+              {onOpenPrayerReminder && (
+                <button
+                  onClick={onOpenPrayerReminder}
+                  className={`relative inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg transition-colors border ${
+                    reminderActive
+                      ? 'bg-amber-50 text-amber-950 border-amber-300 font-bold shadow-2xs'
+                      : 'text-slate-700 bg-slate-100 hover:bg-slate-200 border-slate-200'
+                  }`}
+                  title="Daily Morning Prayer Reminders"
+                >
+                  <Bell className={`w-3.5 h-3.5 ${reminderActive ? 'text-amber-600 fill-amber-500' : 'text-slate-600'}`} />
+                  <span>Prayer Alarm</span>
+                  {reminderActive && (
+                    <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping absolute -top-1 -right-1" />
+                  )}
+                </button>
+              )}
+
               <button
                 onClick={() => handleNavClick('live')}
                 className={`inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-lg transition-colors ${
@@ -401,6 +455,26 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               Prayer Request
             </button>
+
+            {onOpenPrayerReminder && (
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onOpenPrayerReminder();
+                }}
+                className="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium text-slate-800 hover:bg-amber-50 flex items-center justify-between"
+              >
+                <div className="flex items-center gap-2">
+                  <Bell className="w-4 h-4 text-amber-600" />
+                  <span>Morning Prayer Alarm</span>
+                </div>
+                <span className={`text-[10px] px-2 py-0.5 rounded font-bold ${
+                  reminderActive ? 'bg-amber-400 text-slate-950' : 'bg-slate-200 text-slate-700'
+                }`}>
+                  {reminderActive ? 'ACTIVE' : 'SETUP'}
+                </span>
+              </button>
+            )}
 
             <button
               onClick={() => handleNavClick('contact')}

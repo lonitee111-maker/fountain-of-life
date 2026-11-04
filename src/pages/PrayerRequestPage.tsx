@@ -17,7 +17,9 @@ import {
   Lock,
   Clock,
   Flame,
-  Users
+  Users,
+  Bell,
+  Sun
 } from 'lucide-react';
 
 interface PrayerRequestPageProps {
@@ -90,6 +92,38 @@ export const PrayerRequestPage: React.FC<PrayerRequestPageProps> = () => {
           <p className="text-slate-300 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
             “Call to Me, and I will answer you, and show you great and mighty things, which you do not know.” — Jeremiah 33:3
           </p>
+        </div>
+      </section>
+
+      {/* Morning Prayer Reminder Ribbon */}
+      <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-gradient-to-r from-amber-500/15 via-blue-900/10 to-amber-500/15 border border-amber-300/80 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xs">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-500 text-slate-950 font-bold flex items-center justify-center shrink-0 shadow-xs">
+              <Sun className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm sm:text-base font-bold text-slate-900 font-serif">
+                  Daily Morning Prayer Alarm & Reminders
+                </h3>
+                <span className="bg-amber-400 text-slate-950 text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                  Wake Up in Grace
+                </span>
+              </div>
+              <p className="text-xs text-slate-600 mt-0.5">
+                Opt-in to receive scheduled scripture verses and audible morning watch chimes each morning at 6:00 AM.
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={() => window.dispatchEvent(new CustomEvent('folc:open-prayer-reminder'))}
+            className="px-4 py-2.5 bg-gradient-to-r from-blue-950 to-blue-900 hover:from-blue-900 hover:to-indigo-950 text-white text-xs font-bold rounded-xl shadow-sm transition-all hover:scale-105 shrink-0 flex items-center gap-1.5"
+          >
+            <Bell className="w-3.5 h-3.5 text-amber-400" />
+            <span>Setup Morning Reminder</span>
+          </button>
         </div>
       </section>
 
