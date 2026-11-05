@@ -1,0 +1,95 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny all unknown paths
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidUserProfile(data) {
+      return data.keys().hasAll(['id', 'email', 'displayName', 'membershipStatus']) &&
+        data.id is string && data.id.size() <= 128 && data.id == request.auth.uid &&
+        data.email is string && data.email.size() <= 256 &&
+        data.displayName is string && data.displayName.size() > 0 && data.displayName.size() <= 100 &&
+        data.membershipStatus in ['visitor', 'member', 'worker', 'minister'] &&
+        (!('phone' in data) || (data.phone is string && data.phone.size() <= 30)) &&
+        (!('photoURL' in data) || (data.photoURL is string && data.photoURL.size() <= 512)) &&
+        (!('homeCell' in data) || (data.homeCell is string && data.homeCell.size() <= 100)) &&
+        (!('department' in data) || (data.department is string && data.department.size() <= 100)) &&
+        (!('baptismStatus' in data) || (data.baptismStatus is string && data.baptismStatus.size() <= 50));
+    }
+
+    function isValidPrayerRequest(data, userId) {
+      return data.keys().hasAll(['id', 'userId', 'title', 'details']) &&
+        data.id is string && data.id.size() <= 128 &&
+        data.userId is string && data.userId == userId &&
+        data.title is string && data.title.size() > 0 && data.title.size() <= 200 &&
+        data.details is string && data.details.size() > 0 && data.details.size() <= 3000;
+    }
+
+    function isValidBibleNote(data, userId) {
+      return data.keys().hasAll(['id', 'userId', 'reference', 'text']) &&
+        data.id is string && data.id.size() <= 128 &&
+        data.userId is string && data.userId == userId &&
+        data.reference is string && data.reference.size() <= 100 &&
+        data.text is string && data.text.size() > 0 && data.text.size() <= 5000;
+    }
+
+    // Church Member Profiles
+    match /users/{userId} {
+      allow get: if isSignedIn() && isValidId(userId);
+      allow list: if isSignedIn();
+      allow create: if isOwner(userId) && isValidId(userId) && isValidUserProfile(incoming());
+      allow update: if isOwner(userId) && isValidId(userId) && isValidUserProfile(incoming()) &&
+        incoming().id == existing().id &&
+        incoming().email == existing().email;
+      allow delete: if false;
+
+      // Private User PII / Emergency Contact Info
+      match /private/{docId} {
+        allow read, write: if isOwner(userId) && isValidId(userId);
+      }
+
+      // Member Personal Prayer Requests
+      match /prayer_requests/{requestId} {
+        allow read: if isOwner(userId) && isValidId(userId);
+        allow create: if isOwner(userId) && isValidId(userId) && isValidId(requestId) && isValidPrayerRequest(incoming(), userId);
+        allow update: if isOwner(userId) && isValidId(userId) && isValidId(requestId) && isValidPrayerRequest(incoming(), userId) &&
+          incoming().id == existing().id && incoming().userId == existing().userId;
+        allow delete: if isOwner(userId) && isValidId(userId);
+      }
+
+      // Cloud-Synced Bible Study Notes
+      match /bible_notes/{noteId} {
+        allow read: if isOwner(userId) && isValidId(userId);
+        allow create: if isOwner(userId) && isValidId(userId) && isValidId(noteId) && isValidBibleNote(incoming(), userId);
+        allow update: if isOwner(userId) && isValidId(userId) && isValidId(noteId) && isValidBibleNote(incoming(), userId) &&
+          incoming().id == existing().id && incoming().userId == existing().userId;
+        allow delete: if isOwner(userId) && isValidId(userId);
+      }
+    }
+  }
+}

@@ -16,9 +16,11 @@ import {
   Compass,
   Phone,
   Bell,
-  BellRing
+  BellRing,
+  User
 } from 'lucide-react';
 import { getPrayerReminderSettings } from '../utils/prayerReminderUtils';
+import { useAuth } from '../context/AuthContext';
 
 interface NavbarProps {
   currentPage: PageId;
@@ -39,6 +41,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [aboutDropdownOpen, setAboutDropdownOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [reminderActive, setReminderActive] = useState(false);
+  const { user, profile, openAuthModal } = useAuth();
 
   useEffect(() => {
     // Check initial reminder state
@@ -334,6 +337,41 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <Heart className="w-3.5 h-3.5 fill-current" />
                 <span>Give Online</span>
               </button>
+
+              {/* Member Sign In / Profile Button */}
+              {!user ? (
+                <button
+                  onClick={() => openAuthModal('signin')}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-lg bg-blue-900 hover:bg-blue-950 text-white shadow-xs transition-colors"
+                >
+                  <User className="w-3.5 h-3.5 text-amber-300" />
+                  <span>Sign In</span>
+                </button>
+              ) : (
+                <button
+                  onClick={() => openAuthModal('profile')}
+                  className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-950 border border-blue-200 shadow-2xs transition-all"
+                  title="View Member Card & Profile"
+                >
+                  {user.photoURL ? (
+                    <img
+                      src={user.photoURL}
+                      alt={profile?.displayName || 'Member'}
+                      className="w-6 h-6 rounded-lg object-cover border border-amber-400"
+                    />
+                  ) : (
+                    <div className="w-6 h-6 rounded-lg bg-blue-900 text-amber-300 font-bold flex items-center justify-center text-[11px]">
+                      {profile?.displayName?.charAt(0) || user.displayName?.charAt(0) || 'M'}
+                    </div>
+                  )}
+                  <span className="max-w-[90px] truncate font-bold">
+                    {profile?.displayName?.split(' ')[0] || user.displayName?.split(' ')[0] || 'Member'}
+                  </span>
+                  <span className="text-[10px] bg-amber-400 text-slate-950 px-1.5 py-0.2 rounded font-extrabold uppercase">
+                    {profile?.membershipStatus || 'Member'}
+                  </span>
+                </button>
+              )}
             </div>
 
             {/* Mobile Hamburger Button */}
@@ -486,12 +524,43 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
 
             <div className="pt-4 border-t border-slate-100 flex flex-col gap-2">
+              {!user ? (
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    openAuthModal('signin');
+                  }}
+                  className="w-full py-2.5 px-3 bg-blue-900 text-white rounded-lg text-xs font-bold flex items-center justify-center gap-2 shadow-xs"
+                >
+                  <User className="w-4 h-4 text-amber-300" />
+                  <span>Member Portal: Sign In / Register</span>
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    openAuthModal('profile');
+                  }}
+                  className="w-full py-2.5 px-3 bg-blue-50 border border-blue-200 text-blue-950 rounded-lg text-xs font-bold flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-md bg-blue-900 text-amber-300 flex items-center justify-center text-xs font-bold">
+                      {profile?.displayName?.charAt(0) || user.displayName?.charAt(0) || 'M'}
+                    </div>
+                    <span className="truncate max-w-[150px]">{profile?.displayName || user.displayName}</span>
+                  </div>
+                  <span className="text-[10px] bg-amber-400 text-slate-950 px-2 py-0.5 rounded font-extrabold uppercase">
+                    My Member Card
+                  </span>
+                </button>
+              )}
+
               <button
                 onClick={() => {
                   setMobileMenuOpen(false);
                   onOpenPlanVisit();
                 }}
-                className="w-full py-2.5 text-center text-sm font-bold bg-blue-900 text-white rounded-lg shadow-sm"
+                className="w-full py-2.5 text-center text-sm font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-lg shadow-sm"
               >
                 Plan Your Sunday Visit
               </button>

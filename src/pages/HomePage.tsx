@@ -4,6 +4,7 @@ import { CHURCH_INFO, SERMONS_DATA, EVENTS_DATA, TESTIMONIES_DATA } from '../dat
 import { DailyDevotionalSection } from '../components/DailyDevotionalSection';
 import { WorshipPlaylistSection } from '../components/WorshipPlaylistSection';
 import { NewsletterSubscription } from '../components/NewsletterSubscription';
+import { useAuth } from '../context/AuthContext';
 import { 
   Play, 
   Calendar, 
@@ -48,6 +49,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 }) => {
   // Testimonies filter
   const [testimonyCategory, setTestimonyCategory] = useState<string>('All');
+  const { user, profile, openAuthModal } = useAuth();
 
   const allTestimonies = [...customTestimonies, ...TESTIMONIES_DATA];
   const filteredTestimonies = testimonyCategory === 'All'
@@ -307,6 +309,38 @@ export const HomePage: React.FC<HomePageProps> = ({
               </button>
             </div>
 
+          </div>
+
+          {/* Member Registration Callout Banner */}
+          <div className="mt-10 p-6 rounded-3xl bg-gradient-to-r from-blue-900/60 via-slate-800 to-indigo-900/60 border border-amber-400/40 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 rounded-2xl bg-amber-400 text-slate-950 font-bold flex items-center justify-center shrink-0 shadow-md">
+                <Users className="w-6 h-6 text-blue-950" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h4 className="text-base font-bold text-white font-serif">
+                    Official Church Member Registration
+                  </h4>
+                  {user && (
+                    <span className="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-2 py-0.5 rounded-full font-bold">
+                      Registered
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-slate-300 mt-0.5">
+                  Register your membership profile to obtain your digital Fountain Member Card, connect with cell fellowships, and access pastoral counseling.
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => openAuthModal(user ? 'profile' : 'signin')}
+              className="px-5 py-2.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-bold text-xs rounded-xl shadow-md transition-all hover:scale-105 shrink-0 flex items-center gap-2"
+            >
+              <span>{user ? 'View My Member Card' : 'Register / Sign In Now'}</span>
+              <ChevronRight className="w-4 h-4" />
+            </button>
           </div>
 
         </div>

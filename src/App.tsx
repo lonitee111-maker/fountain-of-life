@@ -14,6 +14,7 @@ import { MinistryJoinModal } from './components/MinistryJoinModal';
 import { TestimonyModal } from './components/TestimonyModal';
 import { PrayerReminderModal } from './components/PrayerReminderModal';
 import { PrayerNotificationToast } from './components/PrayerNotificationToast';
+import { AuthModal } from './components/AuthModal';
 import { checkAndFirePrayerReminder } from './utils/prayerReminderUtils';
 
 // Pages
@@ -263,6 +264,9 @@ export default function App() {
 
       {/* In-App Prayer Notification Toast */}
       <PrayerNotificationToast onNavigate={handleNavigate} />
+
+      {/* Member Sign In / Registration Modal */}
+      <AuthModal />
     </div>
   );
 }

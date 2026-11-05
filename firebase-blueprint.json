@@ -1,0 +1,86 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Profile information of a registered church member or attendee",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "format": "email", "maxLength": 256 },
+        "displayName": { "type": "string", "maxLength": 100 },
+        "photoURL": { "type": "string", "maxLength": 512 },
+        "phone": { "type": "string", "maxLength": 30 },
+        "membershipStatus": {
+          "type": "string",
+          "enum": ["visitor", "member", "worker", "minister"]
+        },
+        "homeCell": { "type": "string", "maxLength": 100 },
+        "department": { "type": "string", "maxLength": 100 },
+        "baptismStatus": { "type": "string", "maxLength": 50 },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "email", "displayName", "membershipStatus"]
+    },
+    "UserPrivateProfile": {
+      "title": "UserPrivateProfile",
+      "description": "Private contact and sensitive personal information for the user",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "format": "email", "maxLength": 256 },
+        "phone": { "type": "string", "maxLength": 30 },
+        "emergencyContact": { "type": "string", "maxLength": 100 },
+        "residentialAddress": { "type": "string", "maxLength": 200 },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["email"]
+    },
+    "MemberPrayerRequest": {
+      "title": "MemberPrayerRequest",
+      "description": "Personal prayer requests posted by registered member",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 200 },
+        "details": { "type": "string", "maxLength": 3000 },
+        "category": { "type": "string", "maxLength": 80 },
+        "isPublicOnWall": { "type": "boolean" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "userId", "title", "details"]
+    },
+    "UserBibleNote": {
+      "title": "UserBibleNote",
+      "description": "Cloud-synced personal scripture study notes",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "reference": { "type": "string", "maxLength": 100 },
+        "text": { "type": "string", "maxLength": 5000 },
+        "highlightColor": { "type": "string", "maxLength": 30 },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "userId", "reference", "text"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "Church members directory profile"
+    },
+    "/users/{userId}/private/info": {
+      "schema": "UserPrivateProfile",
+      "description": "Confidential contact details visible only to owner and pastoral staff"
+    },
+    "/users/{userId}/prayer_requests/{requestId}": {
+      "schema": "MemberPrayerRequest",
+      "description": "Personal prayer requests belonging to the user"
+    },
+    "/users/{userId}/bible_notes/{noteId}": {
+      "schema": "UserBibleNote",
+      "description": "User personal Bible study notes synced to cloud"
+    }
+  }
+}
