@@ -28,8 +28,11 @@
           panel.textContent = 'WEBSITE STARTUP ERROR\n\n' + message + '\n\nPlease send a screenshot of this message.';
         }
         window.addEventListener('error', function (event) {
-          showStartupError(event.message || (event.target && event.target.src) || 'A page resource failed to load.');
-        }, true);
+          // Ignore image, stylesheet, and other resource-loading errors.
+          // Only show this panel for actual JavaScript errors on the window.
+          if (event.target !== window) return;
+          showStartupError(event.message || 'A JavaScript error prevented the website from starting.');
+        });
         window.addEventListener('unhandledrejection', function (event) {
           showStartupError(event.reason && (event.reason.stack || event.reason.message) || String(event.reason));
         });
