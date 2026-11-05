@@ -15,7 +15,32 @@
   </head>
   <body class="bg-slate-50 text-slate-800 antialiased selection:bg-amber-100 selection:text-amber-900">
     <div id="root"></div>
+    <script>
+      (function () {
+        function showStartupError(message) {
+          var panel = document.getElementById('startup-error');
+          if (!panel) {
+            panel = document.createElement('pre');
+            panel.id = 'startup-error';
+            panel.style.cssText = 'position:fixed;z-index:999999;inset:16px;padding:20px;background:#fff1f2;color:#881337;border:2px solid #e11d48;border-radius:12px;white-space:pre-wrap;overflow:auto;font:14px/1.5 monospace';
+            document.body.appendChild(panel);
+          }
+          panel.textContent = 'WEBSITE STARTUP ERROR\n\n' + message + '\n\nPlease send a screenshot of this message.';
+        }
+        window.addEventListener('error', function (event) {
+          showStartupError(event.message || (event.target && event.target.src) || 'A page resource failed to load.');
+        }, true);
+        window.addEventListener('unhandledrejection', function (event) {
+          showStartupError(event.reason && (event.reason.stack || event.reason.message) || String(event.reason));
+        });
+        window.setTimeout(function () {
+          var root = document.getElementById('root');
+          if (root && root.childElementCount === 0) {
+            showStartupError('The website JavaScript loaded, but React did not put anything on the page. This helps us locate the blank-screen problem.');
+          }
+        }, 8000);
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-
